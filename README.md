@@ -11,9 +11,9 @@ Agenda online, prontuário eletrônico, financeiro e relatórios em um só lugar
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 
-![Testes](https://img.shields.io/badge/testes%20de%20integra%C3%A7%C3%A3o-52%20aprovados-2ea44f?style=flat-square)
+![Testes](https://img.shields.io/badge/testes%20de%20integra%C3%A7%C3%A3o-53%20aprovados-2ea44f?style=flat-square)
 ![Perfis](https://img.shields.io/badge/perfis-4-0a66c2?style=flat-square)
-![Tabelas](https://img.shields.io/badge/banco-22%20tabelas-0a66c2?style=flat-square)
+![Tabelas](https://img.shields.io/badge/banco-24%20tabelas-0a66c2?style=flat-square)
 ![Licença](https://img.shields.io/badge/licen%C3%A7a-todos%20os%20direitos%20reservados-critical?style=flat-square)
 
 <br>
@@ -44,8 +44,8 @@ Em muitas clínicas pequenas, os horários, os dados dos pacientes e os pagament
 
 O **FisioLife** reúne essa rotina em um único sistema web:
 
-- 📅 **O paciente** vê os horários livres e marca a própria consulta, sem precisar ligar para a clínica.
-- 🩺 **O fisioterapeuta** acompanha a agenda do dia e registra a evolução de cada atendimento no prontuário.
+- 📅 **O paciente** escolhe o serviço, vê os horários livres e marca a própria consulta, sem precisar ligar para a clínica. Depois, acompanha em casa os cuidados que o fisioterapeuta liberou.
+- 🩺 **O fisioterapeuta** acompanha a agenda do dia, registra a evolução de cada atendimento e pode anexar fotos e PDFs ao prontuário.
 - 🗂️ **A recepção** organiza a agenda de todos os profissionais, os pacientes, os pagamentos e o caixa.
 - 📊 **O administrador** gerencia contas e permissões, consulta relatórios financeiros e de produtividade e faz o backup do banco.
 
@@ -90,12 +90,14 @@ O **FisioLife** reúne essa rotina em um único sistema web:
 <td width="50%" valign="top">
 
 ### 🧑 Paciente
+- Escolha do serviço antes da agenda: aparecem só os fisioterapeutas que fazem aquele serviço
 - Agenda por dia ou por semana, com os horários livres de cada fisioterapeuta
 - Reserva com até 3 meses de antecedência
 - Confirmação de presença e pedido de cancelamento
 - Lista de espera quando não há vagas
 - Histórico das consultas e do prontuário
 - Acompanhamento do plano mensal (sessões usadas no mês)
+- “Minha evolução”: cuidados e imagens liberados pelo fisioterapeuta
 
 </td>
 <td width="50%" valign="top">
@@ -104,6 +106,8 @@ O **FisioLife** reúne essa rotina em um único sistema web:
 - Agenda do turno, com o status de cada atendimento
 - Início e conclusão do atendimento
 - Registro de evolução e de alta no prontuário
+- Cuidados para o paciente, exibidos no portal dele
+- Anexos de fotos e PDFs na evolução, privados até o fisioterapeuta liberar
 - Histórico clínico completo do paciente
 - Registros permanentes: nada é sobrescrito
 
@@ -145,7 +149,7 @@ O **FisioLife** reúne essa rotina em um único sistema web:
 ```mermaid
 flowchart LR
     U["👤 Navegador<br/>HTML · CSS · JavaScript"] -- "Fetch API (JSON)" --> A["⚙️ Servidor PHP 8.2<br/>Páginas e APIs"]
-    A -- "PDO · consultas parametrizadas" --> D[("🗄️ MySQL / MariaDB<br/>22 tabelas")]
+    A -- "PDO · consultas parametrizadas" --> D[("🗄️ MySQL / MariaDB<br/>24 tabelas")]
     A -- "Sessão e cookie seguro" --> U
 ```
 
@@ -170,12 +174,21 @@ Concluir um atendimento grava a evolução no prontuário **na mesma transação
 
 ### Banco de dados
 
-O modelo relacional tem **22 tabelas**: pacientes, profissionais, horários, consultas, prontuários, pagamentos, caixa, planos, auditoria e outras.
+O modelo relacional tem **24 tabelas**: pacientes, profissionais, serviços, horários, consultas, prontuários e anexos, pagamentos, caixa, planos, auditoria e outras. O diagrama está dividido em cinco partes por assunto.
 
 <details>
 <summary><b>Ver o diagrama entidade-relacionamento (DER)</b></summary>
 <br>
-<img src="screenshots/12-diagrama-der.png" alt="Diagrama entidade-relacionamento do FisioLife">
+<p><b>Usuários e cadastros</b></p>
+<img src="screenshots/der-1.png" alt="DER parte 1: usuários e cadastros">
+<p><b>Agenda</b></p>
+<img src="screenshots/der-2.png" alt="DER parte 2: agenda">
+<p><b>Prontuário e anexos</b></p>
+<img src="screenshots/der-3.png" alt="DER parte 3: prontuário e anexos">
+<p><b>Financeiro</b></p>
+<img src="screenshots/der-4.png" alt="DER parte 4: financeiro">
+<p><b>Apoio e segurança</b></p>
+<img src="screenshots/der-5.png" alt="DER parte 5: apoio e segurança">
 </details>
 
 ---
@@ -192,6 +205,7 @@ O sistema guarda dados de saúde, que a LGPD classifica como **dados sensíveis*
 | 🛡️ **Proteção CSRF** | Toda ação que altera dados exige um token válido da sessão. |
 | 💉 **Proteção contra SQL Injection** | Todas as consultas usam PDO com parâmetros separados do SQL. |
 | 👥 **Acesso por perfil** | O fisioterapeuta vê apenas os próprios atendimentos, o paciente vê só os próprios dados e a recepção não acessa o prontuário. |
+| 📎 **Anexos protegidos** | Fotos e PDFs ficam fora da área pública e só são entregues a quem tem permissão. Todo anexo nasce privado. |
 | 📝 **Auditoria** | Acessos e ações importantes ficam registrados para o administrador. |
 | 🔑 **Recuperação de senha** | Código enviado por e-mail, válido por 15 minutos, com limite de tentativas. |
 
@@ -201,11 +215,11 @@ O sistema guarda dados de saúde, que a LGPD classifica como **dados sensíveis*
 
 | Tipo | O que verifica |
 | --- | --- |
-| ✅ **52 testes de integração** | Login, permissões, CSRF, reservas, conflito de horários, prontuário, alta, caixa, pagamentos, recuperação de senha, sessões e backup |
+| ✅ **53 testes de integração** | Login, permissões, CSRF, reservas, conflito de horários, prontuário, alta, caixa, pagamentos, recuperação de senha, sessões e backup |
 | ✅ **Testes de validação** | Datas, horários e CPF |
-| ✅ **Testes de navegador** (Playwright) | Calendários do paciente e do fisioterapeuta, uso pelo celular, teclado e tema escuro |
+| ✅ **Verificação das telas** | Feita manualmente em todos os portais; os testes de navegador (Playwright) estão sendo atualizados para a nova interface |
 
-Os testes rodam em um banco separado e descartável. Os dados reais da clínica nunca são usados.
+Os testes rodam em um banco separado e descartável, instalado do zero. Os dados reais da clínica nunca são usados.
 
 ---
 
